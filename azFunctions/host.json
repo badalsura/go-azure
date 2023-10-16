@@ -14,7 +14,7 @@
   },
   "customHandler": {
     "description": {
-      "defaultExecutablePath": "otp",
+      "defaultExecutablePath": "api.exe",
       "workingDirectory": "",
       "arguments": []
     },

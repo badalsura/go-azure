@@ -9,7 +9,7 @@
         "get",
         "post"
       ],
-      "route" : ""
+      "route" : "auth/{action}"
     },
     {
       "type": "http",

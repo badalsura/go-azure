@@ -10,7 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func UserAuth(c *gin.Context){
+func AuthValidator(c *gin.Context){
 
 	tokenString, err := c.Cookie("authToken")
 

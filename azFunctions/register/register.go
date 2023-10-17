@@ -2,7 +2,6 @@ package register
 
 import (
 	"net/http"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 
@@ -16,13 +15,15 @@ type userData struct {
 	Email       string `json:"email" binding:"required,email"`
 	Password    string `json:"password" binding:"required"`
 	PhoneNumber string `json:"phone" binding:"required"`
+	PhoneVerified bool 
+	EmailVerified bool
 }
 
 
 func RegistrationHandler(c *gin.Context) {
 
 	var Data userData
-	fmt.Printf("yayy")
+
 	if err := c.ShouldBindJSON(&Data); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid JSON Data Format!"})
 		return
@@ -46,7 +47,9 @@ func RegistrationHandler(c *gin.Context) {
 			return
 		}
 
-		emailOtpSid, err := twilioapi.SendEmailOTP(Data.Email)
+		emailOtpSid, err := "123", nil
+		//TODO: Implement email OTP system
+		// emailOtpSid, err := twilioapi.SendEmailOTP(Data.Email)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"Error": "Error sending email otp"})
 			return
@@ -59,21 +62,20 @@ func RegistrationHandler(c *gin.Context) {
 			PhoneNumber: Data.PhoneNumber,
 			EmailOtpSID: emailOtpSid,
 			PhoneOtpSID: phoneOtpSid,
+			PhoneVerified: Data.PhoneVerified,
+			EmailVerified: Data.EmailVerified,
 		}
 
 		newUser := db.Create(&user)
 		if newUser.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"Error": "Error creating new user!"})
 		} else {
-			// db.Model(&user).Where("email LIKE ?", user.Email).UpdateColumns("emailotpsid",emailOtpSid)
-
-			c.JSON(http.StatusAccepted, gin.H{"Message": "Go to /api/verify/email and /api/verify/phone to verify emailID and PhoneNo respectively"})
+			c.JSON(http.StatusAccepted, gin.H{"Message": "Registration Successful! \n Go to /api/verify/email and /api/verify/phone to verify emailID and PhoneNo respectively"})
 		}
 	} else {
 		c.JSON(http.StatusConflict, gin.H{"Error": "User already Exists!"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": "Registration Successful"})
 }
 
 func SendOTP() {

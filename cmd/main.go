@@ -7,10 +7,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
-	"github.com/badalsura/goOtpAuth/azFunctions/userAuth"
 	"github.com/badalsura/goOtpAuth/azFunctions/register"
+	"github.com/badalsura/goOtpAuth/azFunctions/userAuth"
 	"github.com/badalsura/goOtpAuth/azFunctions/verify"
 	"github.com/badalsura/goOtpAuth/internal/initializer"
+	"github.com/badalsura/goOtpAuth/internal/middleware"
 	"github.com/badalsura/goOtpAuth/internal/postgresdb"
 )
 
@@ -39,9 +40,9 @@ func main(){
 
 	api := router.Group("/api")
 	api.POST("/register", register.RegistrationHandler)
-	api.POST("/login", userAuth.LoginUserHandler)
-	api.POST("/logout", userAuth.LogoutUserHandler)
-	verify.OTPVerificationHandler(api)
+	api.GET("/auth/:action", middleware.AuthValidator, userAuth.UserAuthHandler)
+	api.POST("/auth/:action", userAuth.UserAuthHandler)
+	api.POST("/verify/:type", verify.OTPVerificationHandler)
 
 	port := getPort()
 	router.Run(port)

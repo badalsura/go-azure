@@ -12,10 +12,20 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func LoginUserHandler(c *gin.Context){
+func UserAuthHandler(c *gin.Context) {
+	authType := c.Param("action")
+	if authType == "login" && c.Request.Method == http.MethodPost {
+		loginUserHandler(c)
+	} else if authType == "logout" && c.Request.Method == http.MethodGet {
+		logoutUserHandler(c)
+	} else {
+		c.JSON(http.StatusNotFound, gin.H{"Error" : "Path not found!"})
+	}
+}
+func loginUserHandler(c *gin.Context){
 	type userData struct {
-		EmailOrPhone string
-		Password string
+		EmailOrPhone string `json:"user" binding:"required"`
+		Password string `json:"password" binding:"required"`
 	}
 	var user userData
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -25,13 +35,21 @@ func LoginUserHandler(c *gin.Context){
 
 	var checkUser models.User
 	db := postgresdb.DB
-	result := db.First(&checkUser, "email LIKE ? OR phone LIKE ?", user.EmailOrPhone)
-	if result.Error != nil {
+	userExists := db.First(&checkUser, "email LIKE ? OR phone_number LIKE ?", user.EmailOrPhone, user.EmailOrPhone)
+	if userExists.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"Error" : "User doesn't exists!"})
 		return
 	}
-	//TODO: Check if User has already verified Email and Phone no or not
+	//TODO: Check if User has already verified Email and Phone no or not and redirect them to verification page
 	
+	if !checkUser.PhoneVerified {
+		c.JSON(http.StatusUnauthorized, gin.H{"Error" : "Phone not verified yet!"})
+		return
+	}
+	if !checkUser.EmailVerified {
+		c.JSON(http.StatusUnauthorized, gin.H{"Error" : "Email not verified yet!"})
+		return
+	}
 	err := bcrypt.CompareHashAndPassword([]byte(checkUser.Password), []byte(user.Password))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Error" : "Incorrect Password"})
@@ -47,7 +65,7 @@ func LoginUserHandler(c *gin.Context){
 
 }
 
-func LogoutUserHandler(c *gin.Context){
+func logoutUserHandler(c *gin.Context){
 	c.SetCookie("authToken", "", -1, "", "", false, false)
 	c.JSON(http.StatusOK, gin.H{"Message" : "Logged Out Successfully!"})
 }

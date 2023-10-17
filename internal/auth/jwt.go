@@ -7,9 +7,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var JwtSecretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
 
 func GenerateToken(id string) string {
+	var JwtSecretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userid" : id,
 		"exp" : time.Now().Add(time.Hour * 24).Unix(),

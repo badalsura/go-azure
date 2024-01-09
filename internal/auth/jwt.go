@@ -20,3 +20,17 @@ func GenerateToken(id string) string {
 	}
 	return tokenString
 }
+superAdmin
+creater 
+reveiwer
+admin
+publisher
+directory
+
+4 products
+subscriptions
+register
+signing
+company and userAuth
+superAdminverifcation
+razorpay

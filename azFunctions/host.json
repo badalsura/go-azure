@@ -15,7 +15,7 @@
   "extensions": {"http": {"routePrefix": "api"}},
   "customHandler": {
     "description": {
-      "defaultExecutablePath": "api.exe",
+      "defaultExecutablePath": "api",
       "workingDirectory": "",
       "arguments": []
     },
